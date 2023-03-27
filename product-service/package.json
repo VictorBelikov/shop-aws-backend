@@ -1,0 +1,15 @@
+{
+  "name": "product-service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "deploy": "sls deploy"
+  },
+  "author": "Victor Belikov",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.1343.0"
+  },
+  "devDependencies": {}
+}

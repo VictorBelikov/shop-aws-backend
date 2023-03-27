@@ -1,0 +1,26 @@
+service: product-service
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  stage: dev
+  region: us-east-1
+  profile: cloudx
+
+package:
+  patterns:
+    - '!node_modules/**'
+    - '!gitignore'
+    - '!package.json'
+    - '!package-lock.json'
+
+functions:
+  testFunction:
+    handler: handler.hello
+    events:
+      - http:
+          path: hello
+          method: get
+          cors: true

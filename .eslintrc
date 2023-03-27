@@ -1,0 +1,44 @@
+{
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "sourceType": "module"
+  },
+  "extends": [
+    "airbnb-base",
+    "prettier"
+  ],
+  "rules": {
+    "quotes": [2, "single", "avoid-escape"],
+    "no-process-env": "off",
+    "max-len": [
+      "error",
+      {
+        "code": 120
+      }
+    ],
+    "prefer-promise-reject-errors": ["off"],
+    "import/prefer-default-export": ["off"],
+    "import/no-extraneous-dependencies": ["off"],
+    "import/export": ["off"],
+    "import/order": ["off"],
+    "no-return-assign": ["off"],
+    "import/no-unresolved": ["off"],
+    "import/extensions": ["off"],
+    "no-underscore-dangle": ["off"],
+    "indent": [
+      "warn",
+      2,
+      {
+        "SwitchCase": 1,
+        "CallExpression": {"arguments": "off"},
+        "offsetTernaryExpressions": true
+      }
+    ],
+    "linebreak-style": ["error", "unix"],
+    "semi": ["error", "always"],
+    "lines-between-class-members": ["off"],
+    "no-shadow": ["off"],
+    "arrow-body-style": ["warn"],
+    "no-unused-vars": ["warn"]
+  }
+}

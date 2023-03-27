@@ -1,0 +1,13 @@
+module.exports.hello = async (event) => {
+  return {
+    statusCode: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true,
+    },
+    body: JSON.stringify({
+      productName: 'test_product',
+      price: 777,
+    }),
+  };
+};
