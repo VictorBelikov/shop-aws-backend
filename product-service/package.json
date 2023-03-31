@@ -2,15 +2,22 @@
   "name": "product-service",
   "version": "1.0.0",
   "description": "product-service",
-  "type": "module",
   "main": "index.js",
   "scripts": {
     "deploy": "sls deploy"
   },
   "author": "Victor Belikov",
   "license": "ISC",
-  "dependencies": {
-    "aws-sdk": "^2.1343.0"
+  "devDependencies": {
+    "@babel/core": "^7.21.4",
+    "@babel/preset-env": "^7.21.4",
+    "babel-loader": "^9.1.2",
+    "babel-plugin-source-map-support": "^2.2.0",
+    "serverless-webpack": "^5.11.0",
+    "webpack": "^5.77.0",
+    "webpack-node-externals": "^3.0.0"
   },
-  "devDependencies": {}
+  "dependencies": {
+    "source-map-support": "^0.5.21"
+  }
 }

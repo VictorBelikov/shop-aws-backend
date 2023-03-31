@@ -9,11 +9,22 @@ provider:
   region: us-east-1
   profile: cloudx
 
+plugins:
+  - serverless-webpack
+
+custom:
+  webpack:
+    webpackConfig: webpack.config.js
+    includeModules: true # auto-packing of external modules
+
 package:
+  individually: true
+
   patterns:
     - '!node_modules/**'
     - '!gitignore'
     - '!package-lock.json'
+    - '!package.json'
 
 functions:
   getProductsList:
