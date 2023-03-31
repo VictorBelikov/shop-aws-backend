@@ -39,6 +39,7 @@
     "lines-between-class-members": ["off"],
     "no-shadow": ["off"],
     "arrow-body-style": ["warn"],
+    "no-return-await": "warn",
     "no-unused-vars": ["warn"]
   }
 }

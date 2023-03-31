@@ -13,14 +13,25 @@ package:
   patterns:
     - '!node_modules/**'
     - '!gitignore'
-    - '!package.json'
     - '!package-lock.json'
 
 functions:
-  testFunction:
-    handler: handler.hello
+  getProductsList:
+    handler: lambdas/getProductsList.getProductsList
     events:
       - http:
-          path: hello
+          path: products
           method: get
           cors: true
+
+  getProductById:
+    handler: lambdas/getProductById.getProductById
+    events:
+      - http:
+          path: products/{productId}
+          method: get
+          cors: true
+          request:
+            parameters:
+              paths:
+                productId: true

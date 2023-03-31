@@ -1,7 +1,8 @@
 {
   "name": "product-service",
   "version": "1.0.0",
-  "description": "",
+  "description": "product-service",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "deploy": "sls deploy"
