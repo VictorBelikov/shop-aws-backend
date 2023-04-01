@@ -20,3 +20,6 @@ Run unit test
 ### `coverage`
 
 Get unit test coverage (product-service/reports/unit/lcov-report/index.html)
+
+### `api:doc`
+Get swagger file with api description

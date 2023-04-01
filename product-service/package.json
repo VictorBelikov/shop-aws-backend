@@ -6,7 +6,8 @@
   "scripts": {
     "deploy": "sls deploy",
     "test": "jest",
-    "coverage": "jest --coverage"
+    "coverage": "jest --coverage",
+    "api:doc": "aws apigateway get-export --parameters extensions='apigateway' --rest-api-id g73ffqewoi --stage-name dev --export-type swagger swagger.json --profile cloudx --region us-east-1"
   },
   "author": "Victor Belikov",
   "license": "ISC",
