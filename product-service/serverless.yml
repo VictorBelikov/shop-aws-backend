@@ -25,6 +25,8 @@ package:
     - '!gitignore'
     - '!package-lock.json'
     - '!package.json'
+    - '!jest.config.js'
+    - '!__tests__/**'
 
 functions:
   getProductsList:
