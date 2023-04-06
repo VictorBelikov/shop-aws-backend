@@ -27,6 +27,7 @@ package:
     - '!package.json'
     - '!jest.config.js'
     - '!__tests__/**'
+    - '!scripts/**'
 
 functions:
   getProductsList:

@@ -21,7 +21,7 @@ module.exports = {
     rules: [
       {
         test: /\.js$/,
-        exclude: '/__tests__/',
+        exclude: ['/__tests__/', '/scripts/'],
       },
       {
         test: /\.js$/,

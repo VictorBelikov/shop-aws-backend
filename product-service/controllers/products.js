@@ -1,4 +1,4 @@
-import { products } from '../constants/products.js';
+import { products } from '../constants/products.mjs';
 
 export const getAllProducts = () => Promise.resolve(products);
 
