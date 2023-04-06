@@ -9,18 +9,42 @@ provider:
   region: us-east-1
   profile: cloudx
 
+plugins:
+  - serverless-webpack
+
+custom:
+  webpack:
+    webpackConfig: webpack.config.js
+    includeModules: true # auto-packing of external modules
+
 package:
+  individually: true
+
   patterns:
     - '!node_modules/**'
     - '!gitignore'
-    - '!package.json'
     - '!package-lock.json'
+    - '!package.json'
+    - '!jest.config.js'
+    - '!__tests__/**'
 
 functions:
-  testFunction:
-    handler: handler.hello
+  getProductsList:
+    handler: lambdas/getProductsList.getProductsList
     events:
       - http:
-          path: hello
+          path: products
           method: get
           cors: true
+
+  getProductById:
+    handler: lambdas/getProductById.getProductById
+    events:
+      - http:
+          path: products/{productId}
+          method: get
+          cors: true
+          request:
+            parameters:
+              paths:
+                productId: true

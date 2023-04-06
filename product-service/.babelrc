@@ -1,0 +1,11 @@
+{
+  "plugins": ["source-map-support"],
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": true
+      }
+    ]
+  ]
+}

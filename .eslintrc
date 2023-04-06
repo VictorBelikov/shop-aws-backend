@@ -3,6 +3,9 @@
     "ecmaVersion": 2018,
     "sourceType": "module"
   },
+  "env": {
+    "jest": true
+  },
   "extends": [
     "airbnb-base",
     "prettier"
@@ -39,6 +42,7 @@
     "lines-between-class-members": ["off"],
     "no-shadow": ["off"],
     "arrow-body-style": ["warn"],
+    "no-return-await": "warn",
     "no-unused-vars": ["warn"]
   }
 }
