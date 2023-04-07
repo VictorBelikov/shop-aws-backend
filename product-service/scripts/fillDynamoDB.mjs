@@ -1,6 +1,6 @@
 import AWS from 'aws-sdk';
 import { PRODUCTS_TABLE_NAME_DYNAMODB, STOCKS_TABLE_NAME_DYNAMODB } from '../constants/constants.mjs';
-import { products } from '../constants/products.mjs';
+import { products } from '../mocks/products.mjs';
 
 AWS.config.credentials = new AWS.SharedIniFileCredentials({ profile: process.env.AWS_PROFILE });
 const DB = new AWS.DynamoDB.DocumentClient({ region: process.env.AWS_REGION, apiVersion: '2012-08-10' });
