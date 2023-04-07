@@ -32,6 +32,10 @@ custom:
     webpackConfig: webpack.config.js
     includeModules: true # auto-packing of external modules
 
+  environment:
+    PRODUCTS_TABLE_NAME: ${env:PRODUCTS_TABLE_NAME_DYNAMODB}
+    STOCKS_TABLE_NAME: ${env:STOCKS_TABLE_NAME_DYNAMODB}
+
 package:
   individually: true
 
@@ -47,9 +51,7 @@ package:
 functions:
   getProductsList:
     handler: lambdas/getProductsList.getProductsList
-    environment:
-      PRODUCTS_TABLE_NAME: ${env:PRODUCTS_TABLE_NAME_DYNAMODB}
-      STOCKS_TABLE_NAME: ${env:STOCKS_TABLE_NAME_DYNAMODB}
+    environment: ${self:custom.environment}
     events:
       - http:
           path: products
@@ -58,9 +60,7 @@ functions:
 
   getProductById:
     handler: lambdas/getProductById.getProductById
-    environment:
-      PRODUCTS_TABLE_NAME: ${env:PRODUCTS_TABLE_NAME_DYNAMODB}
-      STOCKS_TABLE_NAME: ${env:STOCKS_TABLE_NAME_DYNAMODB}
+    environment: ${self:custom.environment}
     events:
       - http:
           path: products/{productId}
@@ -70,3 +70,12 @@ functions:
             parameters:
               paths:
                 productId: true
+
+  createProduct:
+    handler: lambdas/createProduct.createProduct
+    environment: ${self:custom.environment}
+    events:
+      - http:
+          path: products
+          method: post
+          cors: true
