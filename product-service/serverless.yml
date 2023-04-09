@@ -35,6 +35,11 @@ custom:
   environment:
     PRODUCTS_TABLE_NAME: ${env:PRODUCTS_TABLE_NAME_DYNAMODB}
     STOCKS_TABLE_NAME: ${env:STOCKS_TABLE_NAME_DYNAMODB}
+    RDS_PORT: ${env:RDS_PORT}
+    RDS_HOST: ${env:RDS_HOST}
+    RDS_USERNAME: ${env:RDS_USERNAME}
+    RDS_DB_NAME: ${env:RDS_DB_NAME}
+    RDS_PASS: ${env:RDS_PASS}
 
 package:
   individually: true

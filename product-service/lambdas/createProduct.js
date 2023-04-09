@@ -1,24 +1,34 @@
-import AWS from 'aws-sdk';
-import uniqid from 'uniqid';
 import { successfulResponse, badResponse } from '../helpers/responses.js';
-import { logIncomingRequest } from '../helpers/utils';
-
-const DB = new AWS.DynamoDB.DocumentClient({ region: process.env.AWS_REGION, apiVersion: '2012-08-10' });
+import { logIncomingRequest, validateProductData } from '../helpers/utils';
+import { getPostgresClient } from '../helpers/db';
 
 export const createProduct = async (event) => {
+  logIncomingRequest(event);
+
+  const client = await getPostgresClient();
+
   try {
-    logIncomingRequest(event);
+    const product = JSON.parse(event.body);
+    validateProductData(product);
+    const { title, description, price, count } = product;
 
-    const { title, description, price, count = 0 } = JSON.parse(event.body);
-    const productId = uniqid();
-    const product = { id: productId, title, description, price };
-    const stock = { product_id: productId, count };
+    const [, insert] = await client.query(`
+      begin transaction;
+        with newProduct as (
+            insert into products(title, description, price) values ('${title}', '${description}', '${price}')
+            returning id
+        )
+        insert into stocks (id, count)
+        select newProduct.id, numeric '${count}'
+        from newProduct
+        returning id;
+      commit;
+    `);
 
-    await DB.put({ TableName: process.env.PRODUCTS_TABLE_NAME, Item: product }).promise();
-    await DB.put({ TableName: process.env.STOCKS_TABLE_NAME, Item: stock }).promise();
-
-    return successfulResponse({ message: `product with id: ${productId} successfully created` });
+    return successfulResponse({ message: `product with id: ${insert.rows[0].id} successfully created` });
   } catch (e) {
     return badResponse(e);
+  } finally {
+    await client.end();
   }
 };

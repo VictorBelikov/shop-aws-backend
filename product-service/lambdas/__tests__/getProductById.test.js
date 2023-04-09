@@ -1,19 +1,19 @@
-import { getSpecificProduct } from '../../controllers/products';
 import { getProductById } from '../getProductById';
 import { successfulResponse, badResponse } from '../../helpers/responses';
-
-jest.mock('../../controllers/products', () => ({
-  getSpecificProduct: jest.fn(),
-}));
+import { getPostgresClient } from '../../helpers/db';
 
 jest.mock('../../helpers/responses', () => ({
   successfulResponse: jest.fn(),
   badResponse: jest.fn(),
 }));
 
-const getSpecificProductMocked = jest.mocked(getSpecificProduct);
+jest.mock('../../helpers/db', () => ({
+  getPostgresClient: jest.fn(),
+}));
+
 const successfulResponseMocked = jest.mocked(successfulResponse);
 const badResponseMocked = jest.mocked(badResponse);
+const getPostgresClientMocked = jest.mocked(getPostgresClient);
 
 describe('getProductById', () => {
   const mockedEvent = {
@@ -27,19 +27,17 @@ describe('getProductById', () => {
   });
 
   it('should call successfulResponse if products were fetched from DB', async () => {
-    getSpecificProductMocked.mockReturnValueOnce({});
+    getPostgresClientMocked.mockReturnValueOnce({ query: () => ({ rows: [{}] }), end: jest.fn() });
     await getProductById(mockedEvent);
 
-    expect(getSpecificProductMocked).toHaveBeenCalled();
     expect(successfulResponseMocked).toHaveBeenCalled();
     expect(badResponseMocked).not.toHaveBeenCalled();
   });
 
   it('should call badResponse if products were not found', async () => {
-    getSpecificProductMocked.mockReturnValueOnce(undefined);
+    getPostgresClientMocked.mockReturnValueOnce({ query: () => ({ rows: [undefined] }), end: jest.fn() });
     await getProductById(mockedEvent);
 
-    expect(getSpecificProductMocked).toHaveBeenCalled();
     expect(badResponseMocked).toHaveBeenCalled();
     expect(successfulResponseMocked).not.toHaveBeenCalled();
   });

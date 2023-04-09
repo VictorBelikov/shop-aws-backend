@@ -1,25 +1,28 @@
-import AWS from 'aws-sdk';
 import { badResponse, successfulResponse } from '../helpers/responses.js';
-import { customError } from '../helpers/errorService.js';
-import { joinProductsWithStocks, logIncomingRequest } from '../helpers/utils';
-
-const DB = new AWS.DynamoDB.DocumentClient({ region: process.env.AWS_REGION, apiVersion: '2012-08-10' });
+import { logIncomingRequest } from '../helpers/utils';
+import { customError } from '../helpers/errorService';
+import { getPostgresClient } from '../helpers/db';
 
 export const getProductsList = async (event) => {
+  logIncomingRequest(event);
+
+  const client = await getPostgresClient();
+
   try {
-    logIncomingRequest(event);
+    const { rows: products } = await client.query(`
+        select p.id, p.title, p.description, p.price, s.count
+        from products as p
+        inner join stocks as s
+        on s.id = p.id;`);
 
-    const { Items: products } = await DB.scan({ TableName: process.env.PRODUCTS_TABLE_NAME }).promise();
-    const { Items: stocks } = await DB.scan({ TableName: process.env.STOCKS_TABLE_NAME }).promise();
-
-    if (!products || !stocks) {
-      throw customError('Assets not found', 404);
+    if (products.length === 0) {
+      throw customError('Products not found', 404);
     }
 
-    const joinedProducts = joinProductsWithStocks(products, stocks);
-
-    return successfulResponse(joinedProducts);
+    return successfulResponse(products);
   } catch (e) {
     return badResponse(e);
+  } finally {
+    await client.end();
   }
 };
