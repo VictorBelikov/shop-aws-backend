@@ -7,6 +7,7 @@
     "deploy": "sls deploy",
     "test": "jest",
     "coverage": "jest --coverage",
+    "dynamodb:fill": "AWS_PROFILE=cloudx AWS_REGION=us-east-1 node scripts/fillDynamoDB.mjs",
     "api:doc": "aws apigateway get-export --parameters extensions='apigateway' --rest-api-id g73ffqewoi --stage-name dev --export-type swagger swagger.json --profile cloudx --region us-east-1"
   },
   "author": "Victor Belikov",
@@ -23,6 +24,10 @@
     "webpack-node-externals": "^3.0.0"
   },
   "dependencies": {
-    "source-map-support": "^0.5.21"
+    "@types/pg": "^8.6.6",
+    "aws-sdk": "^2.1351.0",
+    "pg": "^8.10.0",
+    "source-map-support": "^0.5.21",
+    "uniqid": "^5.4.0"
   }
 }

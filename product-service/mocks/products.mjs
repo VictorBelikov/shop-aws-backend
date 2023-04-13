@@ -6,13 +6,13 @@ export const products = [
     title: 'Product1',
   },
   {
-    description: 'Short Product Description7',
+    description: 'Short Product Description2',
     id: '7567ec4b-b10c-48c5-9345-fc73c48a80a1',
     price: 15,
     title: 'Product2',
   },
   {
-    description: 'Short Product Description2',
+    description: 'Short Product Description3',
     id: '7567ec4b-b10c-48c5-9345-fc73c48a80a3',
     price: 23,
     title: 'Product3',
@@ -24,13 +24,13 @@ export const products = [
     title: 'Product4',
   },
   {
-    description: 'Short Product Descriptio1',
+    description: 'Short Product Description5',
     id: '7567ec4b-b10c-48c5-9445-fc73c48a80a2',
     price: 23,
     title: 'Product5',
   },
   {
-    description: 'Short Product Description7',
+    description: 'Short Product Description6',
     id: '7567ec4b-b10c-45c5-9345-fc73c48a80a1',
     price: 19,
     title: 'Product6',

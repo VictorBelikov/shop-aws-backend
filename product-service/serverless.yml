@@ -2,12 +2,27 @@ service: product-service
 
 frameworkVersion: '3'
 
+useDotenv: true
+
 provider:
   name: aws
   runtime: nodejs16.x
   stage: dev
-  region: us-east-1
-  profile: cloudx
+  region: ${env:AWS_REGION}
+  profile: ${env:AWS_PROFILE}
+  # lambda roles
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - arn:aws:dynamodb:${env:AWS_REGION}:${env:ARN_ID}:table/${env:PRODUCTS_TABLE_NAME_DYNAMODB}
+        - arn:aws:dynamodb:${env:AWS_REGION}:${env:ARN_ID}:table/${env:STOCKS_TABLE_NAME_DYNAMODB}
 
 plugins:
   - serverless-webpack
@@ -16,6 +31,15 @@ custom:
   webpack:
     webpackConfig: webpack.config.js
     includeModules: true # auto-packing of external modules
+
+  environment:
+    PRODUCTS_TABLE_NAME: ${env:PRODUCTS_TABLE_NAME_DYNAMODB}
+    STOCKS_TABLE_NAME: ${env:STOCKS_TABLE_NAME_DYNAMODB}
+    RDS_PORT: ${env:RDS_PORT}
+    RDS_HOST: ${env:RDS_HOST}
+    RDS_USERNAME: ${env:RDS_USERNAME}
+    RDS_DB_NAME: ${env:RDS_DB_NAME}
+    RDS_PASS: ${env:RDS_PASS}
 
 package:
   individually: true
@@ -27,10 +51,12 @@ package:
     - '!package.json'
     - '!jest.config.js'
     - '!__tests__/**'
+    - '!scripts/**'
 
 functions:
   getProductsList:
     handler: lambdas/getProductsList.getProductsList
+    environment: ${self:custom.environment}
     events:
       - http:
           path: products
@@ -39,6 +65,7 @@ functions:
 
   getProductById:
     handler: lambdas/getProductById.getProductById
+    environment: ${self:custom.environment}
     events:
       - http:
           path: products/{productId}
@@ -48,3 +75,12 @@ functions:
             parameters:
               paths:
                 productId: true
+
+  createProduct:
+    handler: lambdas/createProduct.createProduct
+    environment: ${self:custom.environment}
+    events:
+      - http:
+          path: products
+          method: post
+          cors: true
