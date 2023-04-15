@@ -17,7 +17,7 @@ export const importFileParser = async (event) => {
 
         // get and parse object from 'upload'
         const response = await s3.getObject(params);
-        response.Body.pipe(csvParser({ separator: '|' }))
+        response.Body?.pipe(csvParser({ separator: '|' }))
           .on('data', (data) => result.push(data))
           .on('error', () => {
             throw customError('Something went wrong while parsing', 422);
