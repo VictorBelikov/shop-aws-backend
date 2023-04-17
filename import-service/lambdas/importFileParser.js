@@ -3,6 +3,7 @@ import csvParser from 'csv-parser';
 import { badResponse, successfulResponse } from '../helpers/responses';
 import { IMPORT_BUCKET, PARSE_FOLDER, UPLOAD_FOLDER } from '../constants/constants';
 import { customError } from '../helpers/errorService';
+import { STATUS_CODE } from '../constants/statusCode';
 
 const s3 = new S3({ region: process.env.AWS_REGION });
 const BUCKET = IMPORT_BUCKET;
@@ -20,7 +21,7 @@ export const importFileParser = async (event) => {
         response.Body?.pipe(csvParser({ separator: '|' }))
           .on('data', (data) => result.push(data))
           .on('error', () => {
-            throw customError('Something went wrong while parsing', 422);
+            throw customError('Something went wrong while parsing', STATUS_CODE.UNPROCESSABLE_ENTITY);
           })
           .on('end', () => {
             console.log('Parsed products: ', result);
