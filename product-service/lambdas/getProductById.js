@@ -2,6 +2,7 @@ import { successfulResponse, badResponse } from '../helpers/responses.js';
 import { customError } from '../helpers/errorService.js';
 import { logIncomingRequest } from '../helpers/utils';
 import { getPostgresClient } from '../helpers/db';
+import { STATUS_CODE } from '../constants/statusCode';
 
 export const getProductById = async (event) => {
   logIncomingRequest(event);
@@ -21,7 +22,7 @@ export const getProductById = async (event) => {
         where p.id = '${productId}';`);
 
     if (!product) {
-      throw customError('Product not found', 404);
+      throw customError('Product not found', STATUS_CODE.NOT_FOUND);
     }
 
     return successfulResponse(product);
