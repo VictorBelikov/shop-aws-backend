@@ -1,6 +1,6 @@
 import { getProductById } from '../getProductById';
-import { successfulResponse, badResponse } from '../../helpers/responses';
-import { getPostgresClient } from '../../helpers/db';
+import { successfulResponse, badResponse } from '../../utils/responses';
+import { getPostgresClient } from '../../repositories/DynamoDB/helpers/getDynamodbClient';
 
 jest.mock('../../helpers/responses', () => ({
   successfulResponse: jest.fn(),
