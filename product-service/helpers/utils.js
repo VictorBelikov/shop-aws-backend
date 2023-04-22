@@ -1,14 +1,23 @@
 import { customError } from './errorService';
+import { STATUS_CODE } from '../constants/statusCode';
 
-// Use only with DynamoDB
-// export const joinProductsWithStocks = (products, stocks) =>
-//   products.map((product) => ({
-//     ...product,
-//     count: stocks.find(({ product_id }) => product_id === product.id)?.count ?? 0,
-//   }));
+export const joinProductsWithStocks = (products, stocks) =>
+  products.map((product) => ({
+    ...product,
+    count: stocks.find(({ product_id }) => product_id === product.id)?.count,
+  }));
 
-// Use only with DynamoDB
-// export const joinProductWithStock = (product, stock) => ({ ...product, count: stock?.count });
+export const joinProductWithStock = (product, stock) => ({ ...product, count: stock?.count });
+
+export const mapProductsToRequestItems = (products) =>
+  products.map((product) => ({
+    PutRequest: {
+      Item: { id: product.id, title: product.title, description: product.description, price: product.price },
+    },
+  }));
+
+export const mapProductsToRequestStocks = (products) =>
+  products.map(({ id, count }) => ({ PutRequest: { Item: { product_id: id, count } } }));
 
 export const validateProductData = ({ title, description, price, count }) => {
   if (
@@ -19,7 +28,7 @@ export const validateProductData = ({ title, description, price, count }) => {
     !description.length ||
     !title.length
   ) {
-    throw customError('Product data is invalid', 400);
+    throw customError('Product data is invalid', STATUS_CODE.BAD_REQUEST);
   }
 };
 
