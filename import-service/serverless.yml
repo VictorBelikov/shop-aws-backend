@@ -1,0 +1,98 @@
+service: import-service
+
+frameworkVersion: '3'
+
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  stage: dev
+  region: ${env:AWS_REGION}
+  profile: ${env:AWS_PROFILE}
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action: s3:ListBucket
+      Resource:
+        - arn:aws:s3:::${self:custom.bucketName}
+    - Effect: Allow
+      Action: s3:*
+      Resource:
+        - arn:aws:s3:::${self:custom.bucketName}/*
+plugins:
+  - serverless-webpack
+
+custom:
+  bucketName: import-service-bucket-csv
+  webpack:
+    webpackConfig: webpack.config.js
+    includeModules: true # auto-packing of external modules
+
+resources:
+  Resources:
+    S3Bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.bucketName}
+        AccessControl: PublicRead
+        CorsConfiguration:
+          CorsRules:
+            - AllowedMethods:
+              - GET
+              - PUT
+              - DELETE
+              - HEAD
+              AllowedOrigins:
+                - '*'
+              AllowedHeaders:
+                - '*'
+
+    WebAppS3BucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket:
+          Ref: S3Bucket
+        PolicyDocument:
+          Statement:
+            - Sid: "AllowPublicRead"
+              Effect: Allow
+              Action: s3:GetObject
+              Resource: arn:aws:s3:::${self:custom.bucketName}/*
+              Principal:
+                AWS: '*'
+
+package:
+  individually: true
+
+  patterns:
+    - '!node_modules/**'
+    - '!gitignore'
+    - '!package-lock.json'
+    - '!package.json'
+    - '!jest.config.js'
+    - '!__tests__/**'
+    - '!scripts/**'
+
+functions:
+  importProductsFile:
+    handler: lambdas/importProductsFile.importProductsFile
+    events:
+      - http:
+          path: import
+          request:
+            parameters:
+              querystrings:
+                name: true
+          method: get
+          cors: true
+
+  importFileParser:
+    handler: lambdas/importFileParser.importFileParser
+    events:
+      - s3:
+          bucket: ${self:custom.bucketName}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: uploaded/
+          existing: true
