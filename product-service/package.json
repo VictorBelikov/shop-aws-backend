@@ -15,6 +15,7 @@
   "devDependencies": {
     "@babel/core": "^7.21.4",
     "@babel/preset-env": "^7.21.4",
+    "@faker-js/faker": "^7.6.0",
     "@types/jest": "^29.5.0",
     "babel-loader": "^9.1.2",
     "babel-plugin-source-map-support": "^2.2.0",
