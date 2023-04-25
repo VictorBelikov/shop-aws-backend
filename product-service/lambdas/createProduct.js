@@ -1,34 +1,19 @@
-import { successfulResponse, badResponse } from '../helpers/responses.js';
-import { logIncomingRequest, validateProductData } from '../helpers/utils';
-import { getPostgresClient } from '../helpers/db';
+import { successfulResponse, badResponse } from '../utils/responses.js';
+import { logIncomingRequest } from '../utils/logIncomingRequest';
+import { STATUS_CODE } from '../constants/statusCode';
+import { ProductService } from '../services/ProductService';
+import { DynamoDb } from '../repositories';
+
+const productService = ProductService(DynamoDb());
 
 export const createProduct = async (event) => {
   logIncomingRequest(event);
 
-  const client = await getPostgresClient();
-
   try {
     const product = JSON.parse(event.body);
-    validateProductData(product);
-    const { title, description, price, count } = product;
-
-    const [, insert] = await client.query(`
-      begin transaction;
-        with newProduct as (
-            insert into products(title, description, price) values ('${title}', '${description}', '${price}')
-            returning id
-        )
-        insert into stocks (id, count)
-        select newProduct.id, numeric '${count}'
-        from newProduct
-        returning id;
-      commit;
-    `);
-
-    return successfulResponse({ message: `product with id: ${insert.rows[0].id} successfully created` });
+    const productId = await productService.create(product);
+    return successfulResponse({ message: `product with id: ${productId} successfully created` }, STATUS_CODE.CREATED);
   } catch (e) {
     return badResponse(e);
-  } finally {
-    await client.end();
   }
 };

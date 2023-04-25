@@ -20,14 +20,24 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
+        - dynamodb:BatchWriteItem
       Resource:
         - arn:aws:dynamodb:${env:AWS_REGION}:${env:ARN_ID}:table/${env:PRODUCTS_TABLE_NAME_DYNAMODB}
         - arn:aws:dynamodb:${env:AWS_REGION}:${env:ARN_ID}:table/${env:STOCKS_TABLE_NAME_DYNAMODB}
+    - Effect: Allow
+      Action: sns:*
+      Resource:
+        Ref: SNSTopic
+
+  environment:
+    SNS_ARN:
+      Ref: SNSTopic
 
 plugins:
   - serverless-webpack
 
 custom:
+  snsName: createProductTopic
   webpack:
     webpackConfig: webpack.config.js
     includeModules: true # auto-packing of external modules
@@ -40,6 +50,31 @@ custom:
     RDS_USERNAME: ${env:RDS_USERNAME}
     RDS_DB_NAME: ${env:RDS_DB_NAME}
     RDS_PASS: ${env:RDS_PASS}
+
+resources:
+  Resources:
+    SNSTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: ${self:custom.snsName}
+    SNSTopicSubscription1:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Endpoint: ${env:WORK_EMAIL}
+        Protocol: email
+        FilterPolicy:
+          createdQuantity: [{"numeric": ["<=", 2]}]
+        TopicArn:
+          Ref: SNSTopic
+    SNSTopicSubscription2:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Endpoint: ${env:PERSONAL_EMAIL}
+        Protocol: email
+        FilterPolicy:
+          createdQuantity: [{"numeric": [">", 2]}]
+        TopicArn:
+          Ref: SNSTopic
 
 package:
   individually: true
@@ -84,3 +119,11 @@ functions:
           path: products
           method: post
           cors: true
+
+  catalogBatchProcess:
+    handler: lambdas/catalogBatchProcess.catalogBatchProcess
+    environment: ${self:custom.environment}
+    events:
+      - sqs:
+          batchSize: 5
+          arn: arn:aws:sqs:${env:AWS_REGION}:${env:ARN_ID}:${env:SQS_NAME}

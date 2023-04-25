@@ -1,8 +1,8 @@
 import { headers } from '../constants/headers.js';
 import { STATUS_CODE } from '../constants/statusCode';
 
-export const successfulResponse = (body) => ({
-  statusCode: STATUS_CODE.SUCCESS,
+export const successfulResponse = (body, statusCode) => ({
+  statusCode: statusCode || STATUS_CODE.SUCCESS,
   headers,
   body: JSON.stringify(body),
 });

@@ -1,7 +1,7 @@
 import { Client } from 'pg';
 
 const { RDS_DB_NAME, RDS_PORT, RDS_PASS, RDS_HOST, RDS_USERNAME } = process.env;
-const dbConfig = {
+const rdsConfig = {
   host: RDS_HOST,
   port: RDS_PORT,
   database: RDS_DB_NAME,
@@ -10,7 +10,7 @@ const dbConfig = {
 };
 
 export const getPostgresClient = async () => {
-  const client = new Client(dbConfig);
+  const client = new Client(rdsConfig);
   await client.connect();
   return client;
 };

@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.312.0",
+    "@aws-sdk/client-sqs": "^3.315.0",
     "@aws-sdk/s3-request-presigner": "^3.312.0",
     "csv-parser": "^3.0.0",
     "source-map-support": "^0.5.21"

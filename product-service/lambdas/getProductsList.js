@@ -1,28 +1,17 @@
-import { badResponse, successfulResponse } from '../helpers/responses.js';
-import { logIncomingRequest } from '../helpers/utils';
-import { customError } from '../helpers/errorService';
-import { getPostgresClient } from '../helpers/db';
+import { badResponse, successfulResponse } from '../utils/responses.js';
+import { logIncomingRequest } from '../utils/logIncomingRequest';
+import { ProductService } from '../services/ProductService';
+import { DynamoDb } from '../repositories';
+
+const productService = ProductService(DynamoDb());
 
 export const getProductsList = async (event) => {
   logIncomingRequest(event);
 
-  const client = await getPostgresClient();
-
   try {
-    const { rows: products } = await client.query(`
-        select p.id, p.title, p.description, p.price, s.count
-        from products as p
-        inner join stocks as s
-        on s.id = p.id;`);
-
-    if (products.length === 0) {
-      throw customError('Products not found', 404);
-    }
-
+    const products = await productService.getAll();
     return successfulResponse(products);
   } catch (e) {
     return badResponse(e);
-  } finally {
-    await client.end();
   }
 };
