@@ -103,6 +103,12 @@ functions:
                 name: true
           method: get
           cors: true
+          authorizer:
+            name: tokenAuth
+            arn: arn:aws:lambda:${env:AWS_REGION}:${env:ARN_ID}:function:authorization-service-dev-basicAuthorizer
+            resultTtlInSeconds: 0 # cache time
+            identitySource: method.request.header.Authorization
+            type: token
 
   importFileParser:
     handler: lambdas/importFileParser.importFileParser

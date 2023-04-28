@@ -1,0 +1,41 @@
+service: authorization-service
+
+frameworkVersion: '3'
+
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  stage: dev
+  region: ${env:AWS_REGION}
+  profile: ${env:AWS_PROFILE}
+
+plugins:
+  - serverless-webpack
+
+custom:
+  webpack:
+    webpackConfig: webpack.config.js
+    includeModules: true # auto-packing of external modules
+
+  environment:
+    GITHUB_LOGIN: ${env:GITHUB_LOGIN}
+    PASSWORD: ${env:PASSWORD}
+
+package:
+  individually: true
+
+  patterns:
+    - '!node_modules/**'
+    - '!gitignore'
+    - '!package-lock.json'
+    - '!package.json'
+    - '!jest.config.js'
+    - '!__tests__/**'
+    - '!scripts/**'
+
+functions:
+  basicAuthorizer:
+    handler: lambdas/basicAuthorizer.basicAuthorizer
+    environment: ${self:custom.environment}
