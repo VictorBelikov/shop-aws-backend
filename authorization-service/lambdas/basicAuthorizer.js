@@ -1,4 +1,5 @@
 import { generatePolicy } from '../utils/generatePolicy';
+import { Access } from '../constants';
 
 const { GITHUB_LOGIN, PASSWORD } = process.env;
 
@@ -14,7 +15,7 @@ export const basicAuthorizer = (event, context, cb) => {
     const buffer = Buffer.from(encodedToken, 'base64');
     const [login, password] = buffer.toString('utf-8').split(':');
 
-    const effect = !login || !password || login !== GITHUB_LOGIN || password !== PASSWORD ? 'Deny' : 'Allow';
+    const effect = !login || !password || login !== GITHUB_LOGIN || password !== PASSWORD ? Access.Deny : Access.Allow;
     const policy = generatePolicy(encodedToken, methodArn, effect);
     cb(null, policy);
   } catch (e) {
