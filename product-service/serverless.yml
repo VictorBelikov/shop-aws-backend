@@ -97,7 +97,11 @@ functions:
           path: products
           method: get
           cors: true
-
+#          authorizer:
+#            name: testCognitoAuthCloudx
+#            type: COGNITO_USER_POOLS
+#            arn: arn:aws:cognito-idp:${env:AWS_REGION}:${env:ARN_ID}:userpool/${env:AWS_REGION}_87fgtYU
+#             # scopes: # possible permissions scopes
   getProductById:
     handler: lambdas/getProductById.getProductById
     environment: ${self:custom.environment}
