@@ -1,0 +1,31 @@
+service: cart-service
+
+frameworkVersion: '3'
+
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  stage: dev
+  region: ${env:AWS_REGION}
+  profile: ${env:AWS_PROFILE}
+
+custom:
+  environment:
+    RDS_PORT: ${env:RDS_PORT}
+    RDS_HOST: ${env:RDS_HOST}
+    RDS_USERNAME: ${env:RDS_USERNAME}
+    RDS_DB_NAME: ${env:RDS_DB_NAME}
+    RDS_PASS: ${env:RDS_PASS}
+
+functions:
+  main:
+    handler: dist/main.handler
+    events:
+      - http:
+          method: ANY
+          path: /
+      - http:
+          method: ANY
+          path: '{proxy+}'
