@@ -1,15 +1,60 @@
 import { Injectable } from '@nestjs/common';
-
 import { v4 } from 'uuid';
+import { Cart, cartItemsTableName, CartStatus, cartTableName } from '../models';
+import { CustomError, getDbClient } from '@shared';
+import AWS from 'aws-sdk';
+import { QueryResult } from 'pg';
 
-import { Cart } from '../models';
+const lambda = new AWS.Lambda();
+const { GET_PRODUCT_LIST_LAMBDA: getProductList } = process.env;
+
+type CartItem = { product_id: string; count: number };
+type CartId = { id: string };
+type ProductListResponse = { statusCode: number; headers: Record<string, string>; body: string };
+type ProductList = { id: string; title: string; description: string; price: number; count: number }[];
 
 @Injectable()
 export class CartService {
   private userCarts: Record<string, Cart> = {};
 
-  findByUserId(userId: string): Cart {
-    return this.userCarts[ userId ];
+  async findByUserId(userId: string): Promise<Cart> {
+    const dbClient = await getDbClient();
+
+    try {
+      const {
+        rows: [cart],
+      }: QueryResult<CartId> = await dbClient.query(`
+        select id from ${cartTableName}
+        where user_id = '${userId}' and status = '${CartStatus.OPEN}';
+      `);
+
+      if (!cart || !cart.id) return undefined;
+
+      const { rows: cartItems }: QueryResult<CartItem> = await dbClient.query(`
+        select product_id, count from ${cartItemsTableName}
+        where cart_id = '${cart.id}';
+      `);
+
+      const { Payload } = await lambda.invoke({ FunctionName: getProductList }).promise();
+      const productListResponse: ProductListResponse = JSON.parse(Payload as string);
+      const productList: ProductList = JSON.parse(productListResponse.body);
+
+      const result: Cart = {
+        id: cart.id,
+        items: cartItems.map((cartItem) => ({
+          count: cartItem.count,
+          product: productList.find(({ id }) => id === cartItem.product_id),
+        })),
+      };
+
+      console.log('--------> ', JSON.stringify(result));
+
+      return this.userCarts[userId];
+    } catch (e) {
+      throw CustomError(e);
+    } finally {
+      await dbClient.end();
+    }
   }
 
   createByUserId(userId: string) {
@@ -19,13 +64,13 @@ export class CartService {
       items: [],
     };
 
-    this.userCarts[ userId ] = userCart;
+    this.userCarts[userId] = userCart;
 
     return userCart;
   }
 
-  findOrCreateByUserId(userId: string): Cart {
-    const userCart = this.findByUserId(userId);
+  async findOrCreateByUserId(userId: string): Promise<Cart> {
+    const userCart = await this.findByUserId(userId);
 
     if (userCart) {
       return userCart;
@@ -34,22 +79,21 @@ export class CartService {
     return this.createByUserId(userId);
   }
 
-  updateByUserId(userId: string, { items }: Cart): Cart {
-    const { id, ...rest } = this.findOrCreateByUserId(userId);
+  async updateByUserId(userId: string, { items }: Cart): Promise<Cart> {
+    const { id, ...rest } = await this.findOrCreateByUserId(userId);
 
     const updatedCart = {
       id,
       ...rest,
-      items: [ ...items ],
-    }
+      items: [...items],
+    };
 
-    this.userCarts[ userId ] = { ...updatedCart };
+    this.userCarts[userId] = { ...updatedCart };
 
     return { ...updatedCart };
   }
 
   removeByUserId(userId): void {
-    this.userCarts[ userId ] = null;
+    this.userCarts[userId] = null;
   }
-
 }

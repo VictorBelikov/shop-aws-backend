@@ -11,6 +11,11 @@ provider:
   region: ${env:AWS_REGION}
   profile: ${env:AWS_PROFILE}
 
+  iamRoleStatements:
+    - Effect: Allow
+      Action: lambda:InvokeFunction
+      Resource: '*'
+
 custom:
   environment:
     RDS_PORT: ${env:RDS_PORT}
@@ -18,10 +23,12 @@ custom:
     RDS_USERNAME: ${env:RDS_USERNAME}
     RDS_DB_NAME: ${env:RDS_DB_NAME}
     RDS_PASS: ${env:RDS_PASS}
+    GET_PRODUCT_LIST_LAMBDA: ${env:GET_PRODUCT_LIST_LAMBDA}
 
 functions:
   main:
     handler: dist/main.handler
+    environment: ${self:custom.environment}
     events:
       - http:
           method: ANY
