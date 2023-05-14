@@ -15,10 +15,9 @@ create table if not exists users(
 create table if not exists carts(
     id uuid not null default uuid_generate_v4() primary key ,
     user_id uuid not null ,
-    foreign key (user_id) references users(id) ,
-    created_at date not null ,
-    updated_at date not null,
-    status cart_state
+    created_at date not null default now() ,
+    updated_at date not null default now() ,
+    status cart_state not null
 );
 
 create table if not exists cart_items(
@@ -44,11 +43,16 @@ insert into users (id, email, password, name) values ('d620112f-1c5d-4bb5-ba1d-9
 insert into users (id, email, password, name) values ('a1324c6f-e53e-4127-ab9a-5acd74604a8d', 'someEmail2@example.com', 'pass_2', 'user_2');
 insert into users (id, email, password, name) values ('00580619-2a67-4070-8f02-7e1994ee9fa1', 'someEmail3@example.com', 'pass_3', 'user_3');
 
-insert into carts (id, user_id, created_at, updated_at, status) values ('62068e2d-4ab8-4ad1-8da3-9eb5ff2b67da', 'd620112f-1c5d-4bb5-ba1d-905b5b1285eb', '2023-01-12', '2023-01-12', 'ORDERED');
-insert into carts (id, user_id, created_at, updated_at, status) values ('7393b00d-4965-4351-9214-93caa43f1ed9', 'd620112f-1c5d-4bb5-ba1d-905b5b1285eb', '2023-02-23', '2023-02-23', 'OPEN');
-insert into carts (id, user_id, created_at, updated_at, status) values ('e0378720-4aff-4ba7-933f-8bf15ab503f7', 'a1324c6f-e53e-4127-ab9a-5acd74604a8d', '2023-04-17', '2023-04-17', 'ORDERED');
-insert into carts (id, user_id, created_at, updated_at, status) values ('0a0690ed-e763-4c57-bc56-7e59698c68e4', 'a1324c6f-e53e-4127-ab9a-5acd74604a8d', '2023-05-17', '2023-05-17', 'OPEN');
-insert into carts (id, user_id, created_at, updated_at, status) values ('693806b9-fd5a-4c51-8402-fe099a1f608e', '00580619-2a67-4070-8f02-7e1994ee9fa1', '2023-03-20', '2023-03-20', 'OPEN');
+insert into carts (id, user_id, created_at, updated_at, status)
+    values ('62068e2d-4ab8-4ad1-8da3-9eb5ff2b67da', 'd620112f-1c5d-4bb5-ba1d-905b5b1285eb', '2023-01-12', '2023-01-12', 'ORDERED');
+insert into carts (id, user_id, created_at, updated_at, status)
+    values ('7393b00d-4965-4351-9214-93caa43f1ed9', 'd620112f-1c5d-4bb5-ba1d-905b5b1285eb', '2023-02-23', '2023-02-23', 'OPEN');
+insert into carts (id, user_id, created_at, updated_at, status)
+    values ('e0378720-4aff-4ba7-933f-8bf15ab503f7', 'a1324c6f-e53e-4127-ab9a-5acd74604a8d', '2023-04-17', '2023-04-17', 'ORDERED');
+insert into carts (id, user_id, created_at, updated_at, status)
+    values ('0a0690ed-e763-4c57-bc56-7e59698c68e4', 'a1324c6f-e53e-4127-ab9a-5acd74604a8d', '2023-05-17', '2023-05-17', 'OPEN');
+insert into carts (id, user_id, created_at, updated_at, status)
+    values ('693806b9-fd5a-4c51-8402-fe099a1f608e', '00580619-2a67-4070-8f02-7e1994ee9fa1', '2023-03-20', '2023-03-20', 'OPEN');
 
 insert into cart_items (cart_id, product_id, count) values ('62068e2d-4ab8-4ad1-8da3-9eb5ff2b67da', '7567ec4b-b10c-48c5-9345-fc73c48a80aa', 5);
 insert into cart_items (cart_id, product_id, count) values ('7393b00d-4965-4351-9214-93caa43f1ed9', '7567ec4b-b10c-48c5-9445-fc73c48a80a2', 6);

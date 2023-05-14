@@ -39,17 +39,13 @@ export class CartService {
       const productListResponse: ProductListResponse = JSON.parse(Payload as string);
       const productList: ProductList = JSON.parse(productListResponse.body);
 
-      const result: Cart = {
+      return {
         id: cart.id,
         items: cartItems.map((cartItem) => ({
           count: cartItem.count,
           product: productList.find(({ id }) => id === cartItem.product_id),
         })),
       };
-
-      console.log('--------> ', JSON.stringify(result));
-
-      return this.userCarts[userId];
     } catch (e) {
       throw CustomError(e);
     } finally {
@@ -57,16 +53,23 @@ export class CartService {
     }
   }
 
-  createByUserId(userId: string) {
-    const id = v4(v4());
-    const userCart = {
-      id,
-      items: [],
-    };
+  async createByUserId(userId: string) {
+    const dbClient = await getDbClient();
 
-    this.userCarts[userId] = userCart;
+    try {
+      const newCartId = v4();
 
-    return userCart;
+      await dbClient.query(`
+        insert into ${cartTableName} (id, user_id, status)
+        values ('${newCartId}', '${userId}', '${CartStatus.OPEN}');
+      `);
+
+      return await this.findByUserId(userId);
+    } catch (e) {
+      throw CustomError(e);
+    } finally {
+      await dbClient.end();
+    }
   }
 
   async findOrCreateByUserId(userId: string): Promise<Cart> {
