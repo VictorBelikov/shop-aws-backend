@@ -1,14 +1,4 @@
-import {
-  Controller,
-  Get,
-  Delete,
-  Put,
-  Body,
-  Req,
-  Post,
-  UseGuards,
-  HttpStatus,
-} from '@nestjs/common';
+import { Controller, Get, Delete, Put, Body, Req, Post, UseGuards, HttpStatus } from '@nestjs/common';
 
 // import { BasicAuthGuard, JwtAuthGuard } from '../auth';
 import { OrderService } from '../order';
@@ -19,18 +9,13 @@ import { CartService } from './services';
 
 @Controller('api/profile/cart')
 export class CartController {
-  constructor(
-    private cartService: CartService,
-    private orderService: OrderService,
-  ) {}
+  constructor(private cartService: CartService, private orderService: OrderService) {}
 
   // @UseGuards(JwtAuthGuard)
   // @UseGuards(BasicAuthGuard)
   @Get()
   async findUserCart(@Req() req: AppRequest) {
-    const cart = await this.cartService.findOrCreateByUserId(
-      getUserIdFromRequest(req),
-    );
+    const cart = await this.cartService.findOrCreateByUserId(getUserIdFromRequest(req));
 
     return {
       statusCode: HttpStatus.OK,
@@ -44,10 +29,7 @@ export class CartController {
   @Put()
   async updateUserCart(@Req() req: AppRequest, @Body() body) {
     // TODO: validate body payload...
-    const cart = await this.cartService.updateByUserId(
-      getUserIdFromRequest(req),
-      body,
-    );
+    const cart = await this.cartService.updateByUserId(getUserIdFromRequest(req), body);
 
     return {
       statusCode: HttpStatus.OK,
@@ -62,8 +44,8 @@ export class CartController {
   // @UseGuards(JwtAuthGuard)
   // @UseGuards(BasicAuthGuard)
   @Delete()
-  clearUserCart(@Req() req: AppRequest) {
-    this.cartService.removeByUserId(getUserIdFromRequest(req));
+  async clearUserCart(@Req() req: AppRequest) {
+    await this.cartService.removeByUserId(getUserIdFromRequest(req));
 
     return {
       statusCode: HttpStatus.OK,

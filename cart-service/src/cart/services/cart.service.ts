@@ -3,7 +3,7 @@ import { v4 } from 'uuid';
 import { Cart, cartItemsTableName, CartStatus, cartTableName } from '../models';
 import { CustomError, getDbClient } from '@shared';
 import AWS from 'aws-sdk';
-import { QueryResult } from 'pg';
+import { Client, QueryResult } from 'pg';
 
 const lambda = new AWS.Lambda();
 const { GET_PRODUCT_LIST_LAMBDA: getProductList } = process.env;
@@ -15,24 +15,27 @@ type ProductList = { id: string; title: string; description: string; price: numb
 
 @Injectable()
 export class CartService {
-  private userCarts: Record<string, Cart> = {};
+  private async getCartId(dbClient: Client, userId: string): Promise<string> {
+    const {
+      rows: [cart],
+    }: QueryResult<CartId> = await dbClient.query(`
+        select id from ${cartTableName}
+        where user_id = '${userId}' and status = '${CartStatus.OPEN}';
+      `);
+    return cart?.id;
+  }
 
   async findByUserId(userId: string): Promise<Cart> {
     const dbClient = await getDbClient();
 
     try {
-      const {
-        rows: [cart],
-      }: QueryResult<CartId> = await dbClient.query(`
-        select id from ${cartTableName}
-        where user_id = '${userId}' and status = '${CartStatus.OPEN}';
-      `);
+      const cartId = await this.getCartId(dbClient, userId);
 
-      if (!cart || !cart.id) return undefined;
+      if (!cartId) return undefined;
 
       const { rows: cartItems }: QueryResult<CartItem> = await dbClient.query(`
         select product_id, count from ${cartItemsTableName}
-        where cart_id = '${cart.id}';
+        where cart_id = '${cartId}';
       `);
 
       const { Payload } = await lambda.invoke({ FunctionName: getProductList }).promise();
@@ -40,7 +43,7 @@ export class CartService {
       const productList: ProductList = JSON.parse(productListResponse.body);
 
       return {
-        id: cart.id,
+        id: cartId,
         items: cartItems.map((cartItem) => ({
           count: cartItem.count,
           product: productList.find(({ id }) => id === cartItem.product_id),
@@ -108,7 +111,22 @@ export class CartService {
     }
   }
 
-  removeByUserId(userId): void {
-    this.userCarts[userId] = null;
+  async removeByUserId(userId): Promise<void> {
+    const dbClient = await getDbClient();
+
+    try {
+      const cartId = await this.getCartId(dbClient, userId);
+
+      if (!cartId) return undefined;
+
+      await dbClient.query(`
+        delete from ${cartItemsTableName}
+        where cart_id = '${cartId}';
+      `);
+    } catch (e) {
+      throw CustomError(e);
+    } finally {
+      await dbClient.end();
+    }
   }
 }

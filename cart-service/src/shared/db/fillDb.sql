@@ -22,7 +22,7 @@ create table if not exists carts(
 
 create table if not exists cart_items(
     cart_id uuid not null ,
-    foreign key (cart_id) references carts(id) ,
+    foreign key (cart_id) references carts(id) on delete cascade ,
     product_id uuid not null ,
     count numeric
 );
