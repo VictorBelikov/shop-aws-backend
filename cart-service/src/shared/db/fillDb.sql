@@ -58,7 +58,10 @@ insert into cart_items (cart_id, product_id, count) values ('62068e2d-4ab8-4ad1-
 insert into cart_items (cart_id, product_id, count) values ('7393b00d-4965-4351-9214-93caa43f1ed9', '7567ec4b-b10c-48c5-9445-fc73c48a80a2', 6);
 insert into cart_items (cart_id, product_id, count) values ('e0378720-4aff-4ba7-933f-8bf15ab503f7', '7567ec4b-b10c-45c5-9345-fc73c48a80a1', 7);
 insert into cart_items (cart_id, product_id, count) values ('693806b9-fd5a-4c51-8402-fe099a1f608e', '7567ec4b-b10c-48c5-9345-fc73c48a80a3', 8);
+
 insert into cart_items (cart_id, product_id, count) values ('0a0690ed-e763-4c57-bc56-7e59698c68e4', '7567ec4b-b10c-48c5-9345-fc73348a80a1', 2);
+insert into cart_items (cart_id, product_id, count) values ('0a0690ed-e763-4c57-bc56-7e59698c68e4', '7567ec4b-b10c-48c5-9345-fc73c48a80a1', 4);
+insert into cart_items (cart_id, product_id, count) values ('0a0690ed-e763-4c57-bc56-7e59698c68e4', '7567ec4b-b10c-48c5-9445-fc73c48a80a2', 1);
 
 insert into orders (id, cart_id, user_id, comments, total, payment, delivery, status)
     values ('4e714b86-ec10-4d6b-84e2-4ea16b21e435', '62068e2d-4ab8-4ad1-8da3-9eb5ff2b67da', 'd620112f-1c5d-4bb5-ba1d-905b5b1285eb', 'some_comment_1', 777, '{"type": "card"}', '{"type": "delivery_1", "address": "some_address_1"}', 'DELIVERED');

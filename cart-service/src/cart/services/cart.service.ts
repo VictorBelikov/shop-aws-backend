@@ -83,17 +83,29 @@ export class CartService {
   }
 
   async updateByUserId(userId: string, { items }: Cart): Promise<Cart> {
-    const { id, ...rest } = await this.findOrCreateByUserId(userId);
+    const dbClient = await getDbClient();
 
-    const updatedCart = {
-      id,
-      ...rest,
-      items: [...items],
-    };
+    try {
+      const { id: cartId, ...rest } = await this.findOrCreateByUserId(userId);
 
-    this.userCarts[userId] = { ...updatedCart };
+      await dbClient.query(`
+        delete from ${cartItemsTableName}
+        where cart_id = '${cartId}';
+      `);
 
-    return { ...updatedCart };
+      const newCartItemValues = items.map((item) => `('${cartId}','${item.product.id}','${item.count}')`).join(',');
+
+      await dbClient.query(`
+        insert into ${cartItemsTableName} (cart_id, product_id, count)
+        values ${newCartItemValues};
+      `);
+
+      return await this.findByUserId(userId);
+    } catch (e) {
+      throw CustomError(e);
+    } finally {
+      await dbClient.end();
+    }
   }
 
   removeByUserId(userId): void {
