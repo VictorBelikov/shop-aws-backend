@@ -19,6 +19,17 @@ export type Order = {
   total: number;
 };
 
+export type OrderEntity = {
+  id?: string;
+  user_id: string;
+  cart_id: string;
+  payment: string; // will be parsed to JSON
+  delivery: string; // will be parsed to JSON
+  comments: string;
+  total: number;
+  status: OrderStatus;
+};
+
 export const orderTableName = 'orders';
 
 export enum OrderStatus {
