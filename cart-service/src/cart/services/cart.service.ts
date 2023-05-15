@@ -111,7 +111,7 @@ export class CartService {
     }
   }
 
-  async removeByUserId(userId): Promise<void> {
+  async removeByUserId(userId: string): Promise<void> {
     const dbClient = await getDbClient();
 
     try {
@@ -122,6 +122,26 @@ export class CartService {
       await dbClient.query(`
         delete from ${cartItemsTableName}
         where cart_id = '${cartId}';
+      `);
+    } catch (e) {
+      throw CustomError(e);
+    } finally {
+      await dbClient.end();
+    }
+  }
+
+  async setCartToOrdered(userId: string): Promise<void> {
+    const dbClient = await getDbClient();
+
+    try {
+      const cartId = await this.getCartId(dbClient, userId);
+
+      if (!cartId) return undefined;
+
+      await dbClient.query(`
+        update ${cartTableName}
+        set status = '${CartStatus.ORDERED}'
+        where id = '${cartId}';
       `);
     } catch (e) {
       throw CustomError(e);

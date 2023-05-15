@@ -2,7 +2,7 @@ import { Controller, Get, Delete, Put, Body, Req, Post, UseGuards, HttpStatus } 
 
 // import { BasicAuthGuard, JwtAuthGuard } from '../auth';
 import { OrderService } from '../order';
-import { AppRequest, getUserIdFromRequest } from '@shared';
+import { AppRequest, getUserIdFromRequest, successfulResponse } from '@shared';
 
 import { calculateCartTotal } from './models-rules';
 import { CartService } from './services';
@@ -17,28 +17,16 @@ export class CartController {
   async findUserCart(@Req() req: AppRequest) {
     const cart = await this.cartService.findOrCreateByUserId(getUserIdFromRequest(req));
 
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'OK',
-      data: { cart, total: calculateCartTotal(cart) },
-    };
+    return successfulResponse({ cart, total: calculateCartTotal(cart) });
   }
 
   // @UseGuards(JwtAuthGuard)
   // @UseGuards(BasicAuthGuard)
   @Put()
   async updateUserCart(@Req() req: AppRequest, @Body() body) {
-    // TODO: validate body payload...
     const cart = await this.cartService.updateByUserId(getUserIdFromRequest(req), body);
 
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'OK',
-      data: {
-        cart,
-        total: calculateCartTotal(cart),
-      },
-    };
+    return successfulResponse({ cart, total: calculateCartTotal(cart) });
   }
 
   // @UseGuards(JwtAuthGuard)
@@ -47,10 +35,7 @@ export class CartController {
   async clearUserCart(@Req() req: AppRequest) {
     await this.cartService.removeByUserId(getUserIdFromRequest(req));
 
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'OK',
-    };
+    return successfulResponse();
   }
 
   // @UseGuards(JwtAuthGuard)
@@ -64,10 +49,7 @@ export class CartController {
       const statusCode = HttpStatus.BAD_REQUEST;
       req.statusCode = statusCode;
 
-      return {
-        statusCode,
-        message: 'Cart is empty',
-      };
+      return successfulResponse({}, 'Cart is empty', statusCode);
     }
 
     const { id: cartId, items } = cart;
@@ -79,12 +61,9 @@ export class CartController {
       items,
       total,
     });
-    this.cartService.removeByUserId(userId);
+    await this.cartService.removeByUserId(userId);
+    await this.cartService.setCartToOrdered(userId);
 
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'OK',
-      data: { order },
-    };
+    return successfulResponse({ order });
   }
 }
