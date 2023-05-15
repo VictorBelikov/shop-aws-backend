@@ -1,15 +1,28 @@
 import { Injectable } from '@nestjs/common';
 import { v4 } from 'uuid';
 import { Order, OrderEntity, orderTableName } from '../models';
-import { CustomError, getDbPool, TransactionState } from '@shared';
+import { CustomError, getDbPool, getDbClient, TransactionState } from '@shared';
 import { CartItem, cartItemsTableName, CartStatus, cartTableName } from '../../cart';
 
 @Injectable()
 export class OrderService {
-  private orders: Record<string, Order> = {};
+  async findById(orderId: string): Promise<Order> {
+    const dbClient = await getDbClient();
 
-  findById(orderId: string): Order {
-    return this.orders[orderId];
+    try {
+      const {
+        rows: [order],
+      } = await dbClient.query(`
+        select * from ${orderTableName}
+        where id = '${orderId}';
+      `);
+
+      return { ...order };
+    } catch (e) {
+      throw CustomError(e);
+    } finally {
+      await dbClient.end();
+    }
   }
 
   async create(data: OrderEntity, items: CartItem[]): Promise<Order> {
@@ -64,16 +77,30 @@ export class OrderService {
     }
   }
 
-  update(orderId, data) {
+  async update(
+    orderId,
+    { delivery, payment, comments }: Pick<OrderEntity, 'payment' | 'delivery' | 'comments'>,
+  ): Promise<void> {
     const order = this.findById(orderId);
 
     if (!order) {
       throw new Error('Order does not exist.');
     }
 
-    this.orders[orderId] = {
-      ...data,
-      id: orderId,
-    };
+    const dbClient = await getDbClient();
+
+    try {
+      await dbClient.query(`
+        update ${orderTableName}
+        set delivery = '${delivery}',
+            payment = '${payment}',
+            comments = '${comments}'
+        where id = '${orderId}';
+      `);
+    } catch (e) {
+      throw CustomError(e);
+    } finally {
+      await dbClient.end();
+    }
   }
 }
