@@ -71,9 +71,6 @@ export class CartController {
       items,
     );
 
-    await this.cartService.removeByUserId(userId);
-    await this.cartService.setCartToOrdered(userId);
-
     return successfulResponse({ order });
   }
 }

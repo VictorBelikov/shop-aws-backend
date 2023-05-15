@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { v4 } from 'uuid';
 import { Order, OrderEntity, orderTableName } from '../models';
-import { CustomError, getDbClient } from '@shared';
-import { CartItem } from '../../cart';
+import { CustomError, getDbPool, TransactionState } from '@shared';
+import { CartItem, cartItemsTableName, CartStatus, cartTableName } from '../../cart';
 
 @Injectable()
 export class OrderService {
@@ -13,16 +13,37 @@ export class OrderService {
   }
 
   async create(data: OrderEntity, items: CartItem[]): Promise<Order> {
-    const dbClient = await getDbClient();
+    const dbClient = await getDbPool();
 
     try {
       const newOrderId = v4();
       const { payment, status, total, comments, delivery, user_id, cart_id } = data;
 
+      await dbClient.query(TransactionState.BEGIN);
+
+      // Create order
       await dbClient.query(`
         insert into ${orderTableName} (id, cart_id, user_id, payment, status, total, comments, delivery)
         values ('${newOrderId}', '${cart_id}', '${user_id}', '${payment}', '${status}', '${total}', '${comments}', '${delivery}');
+            
+        delete from ${cartItemsTableName}
+        where cart_id = '${cart_id}';
       `);
+
+      // Clear cart_items
+      await dbClient.query(`
+        delete from ${cartItemsTableName}
+        where cart_id = '${cart_id}';
+      `);
+
+      // Set cart status to 'ORDERED'
+      await dbClient.query(`
+        update ${cartTableName}
+        set status = '${CartStatus.ORDERED}'
+        where id = '${cart_id}';
+      `);
+
+      await dbClient.query(TransactionState.COMMIT);
 
       return {
         id: newOrderId,
@@ -36,9 +57,10 @@ export class OrderService {
         payment: JSON.parse(payment),
       };
     } catch (e) {
+      await dbClient.query(TransactionState.ROLLBACK);
       throw CustomError(e);
     } finally {
-      await dbClient.end();
+      await dbClient.release();
     }
   }
 
